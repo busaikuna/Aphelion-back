@@ -1,0 +1,27 @@
+{
+  "name": "aphelion-back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node main",
+    "dev": "nodemon main",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/busaikuna/Aphelion-back.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/busaikuna/Aphelion-back/issues"
+  },
+  "homepage": "https://github.com/busaikuna/Aphelion-back#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10",
+    "sqlite3": "^5.1.7"
+  }
+}
