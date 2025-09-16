@@ -30,13 +30,13 @@ router.post("/login", (req, res) => {
 
   db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!user) return res.status(400).json({ success: false, message: "User not found" });
+    if (!user) return res.status(400).json({ success: false, message: "User nao encontrado" });
 
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       res.json({ success: true, user: { id: user.id, username: user.username, email: user.email } });
     } else {
-      res.json({ success: false, message: "Incorrect password" });
+      res.json({ success: false, message: "Senha Incorreta" });
     }
   });
 });

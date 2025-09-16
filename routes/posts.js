@@ -24,9 +24,10 @@ router.post("/", (req, res) => {
 router.get("/", (req, res) => {
   db.all(
     `SELECT p.post_id, p.author_id, u.username, p.description, p.content, p.picture, p.created_at
-     FROM posts p
-     JOIN users u ON p.author_id = u.id
-     ORDER BY p.created_at DESC`,
+    FROM posts p
+    JOIN users u ON p.author_id = u.id
+    ORDER BY p.created_at DESC;
+    `,
     [],
     (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
