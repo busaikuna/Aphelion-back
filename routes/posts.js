@@ -1,25 +1,59 @@
 const express = require("express");
+const cloudinary = require("../cloudinary");
+const jwt = require("jsonwebtoken")
+const { SECRET_KEY } = require("../config")
+
 const db = require("../database");
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  const { author_id, description, content, picture } = req.body;
-  if (!author_id || !content) return res.status(400).json({ error: "Author and content required" });
+router.post("/", async (req, res) => {
+  const { token, description, content } = req.body;
+  if (!token || !content) return res.status(401).json({ error: "Access Token and Content required" });
 
-  db.get(`SELECT * FROM users WHERE id = ?`, [author_id], (err, user) => {
+  let author_id;
+  try {
+    const payload = jwt.verify(token, SECRET_KEY);
+    author_id = payload.id;
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid Access Token" });
+  }
+
+  db.get(`SELECT * FROM users WHERE id = ?`, [author_id], async (err, user) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!user) return res.status(400).json({ error: "Author not found" });
 
+    let pictureUrl = '';
+
+    if (req.files && req.files.picture) {
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(req.files.picture.tempFilePath, {
+          folder: "posts",
+        });
+        pictureUrl = uploadResponse.secure_url;
+      } catch (err) {
+        console.error("Cloudinary upload error:", err);
+        return res.status(500).json({ error: "Error uploading image" });
+      }
+    }
+
+
     db.run(
       `INSERT INTO posts (author_id, description, content, picture) VALUES (?, ?, ?, ?)`,
-      [author_id, description || "", content, picture || ""],
+      [author_id, description || "", content, pictureUrl],
       function (err) {
         if (err) return res.status(500).json({ error: err.message });
-        res.status(201).json({ post_id: this.lastID, author_id, description, content, picture });
+        res.status(201).json({
+          post_id: this.lastID,
+          author_id,
+          description,
+          content,
+          picture: pictureUrl
+        });
       }
     );
   });
 });
+
 
 router.get("/", (req, res) => {
   db.all(

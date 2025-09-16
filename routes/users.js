@@ -1,8 +1,10 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken")
 const db = require("../database");
 const router = express.Router();
 
+const { SECRET_KEY, REFRESH_SECRET_KEY } = require("../config")
 const SALT_ROUNDS = 10;
 
 router.post("/register", async (req, res) => {
@@ -34,11 +36,42 @@ router.post("/login", (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     if (match) {
-      res.json({ success: true, user: { id: user.id, username: user.username, email: user.email } });
+
+      const accessToken = jwt.sign({
+        id: user.id, username: user.username
+      }, SECRET_KEY, { expiresIn: "15m" })
+
+      const refreshToken = jwt.sign({
+        id: user.id,
+        username: user.username
+      }, REFRESH_SECRET_KEY, { expiresIn: "7d" })
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false, // trocar quando for fazer deploy
+        sameSite: "strict"
+      })
+      res.json({ accessToken });
     } else {
       res.json({ success: false, message: "Senha Incorreta" });
     }
   });
 });
+
+router.post("/refresh", (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (!token) return res.status(401).send("Sem refresh token");
+
+  try {
+    const payload = jwt.verify(token, REFRESH_SECRET_KEY);
+    const newAcess = jwt.sign({
+      id: payload.id,
+      username: payload.username
+    }, SECRET_KEY, { expiresIn: "15m" })
+    res.json({ accessToken: newAcess })
+  } catch {
+    res.status(401).send("Invalid Refresh");
+  }
+})
 
 module.exports = router;

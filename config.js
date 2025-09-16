@@ -1,0 +1,3 @@
+const SECRET_KEY = "JALS"
+const REFRESH_SECRET_KEY = "JALS"
+module.exports = {SECRET_KEY, REFRESH_SECRET_KEY}
