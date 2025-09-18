@@ -154,14 +154,6 @@ router.put("/profile/edit", async (req, res) => {
       }
     }
 
-    console.log({
-      username: username || user.username,
-      address: address || user.address,
-      profile_picture: profileUrl,
-      banner_picture: bannerUrl,
-      website: website || user.website,
-    });
-
     db.run(
       `UPDATE users 
        SET username = ?, address = ?, profile_picture = ?, banner_picture = ?, website = ?
