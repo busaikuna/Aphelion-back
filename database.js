@@ -15,6 +15,7 @@ db.serialize(() => {
       email TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL,
       address TEXT,
+      description TEXT,
       profile_picture TEXT,
       banner_picture TEXT,
       website TEXT,

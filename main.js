@@ -10,7 +10,8 @@ const userRoutes = require("./routes/users");
 const postRoutes = require("./routes/posts");
 
 app.use(cors({
-  origin: "http://127.0.0.1:5500",
+  origin: "http://127.0.0.1:5501",
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 

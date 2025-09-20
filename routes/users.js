@@ -24,6 +24,7 @@ router.get("/myProfile", async (req, res) => {
       res.json({
         profile_username: user.username,
         profile_email: user.email,
+        profile_description: user.description,
         profile_address: user.address,
         profile_picture: user.profile_picture,
         profile_banner: user.banner_picture,
@@ -89,9 +90,10 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/refresh", (req, res) => {
-  const token = req.cookies.refreshToken;
-  console.log(token)
-  if (!token) return res.status(401).send("Sem refresh token");
+
+  if (!req.cookies.refreshToken) {
+    return res.status(401).send("Sem refresh token");
+  }
 
   try {
     const payload = jwt.verify(token, REFRESH_SECRET_KEY);
@@ -106,7 +108,7 @@ router.post("/refresh", (req, res) => {
 })
 
 router.put("/profile/edit", async (req, res) => {
-  const { token, username, address, website } = req.body;
+  const { token, username, address, website, description } = req.body;
   if (!token) return res.status(401).json({ error: "Access token required" });
 
   let userId;
@@ -156,7 +158,12 @@ router.put("/profile/edit", async (req, res) => {
 
     db.run(
       `UPDATE users 
-       SET username = ?, address = ?, profile_picture = ?, banner_picture = ?, website = ?
+       SET username = ?, 
+       address = ?, 
+       profile_picture = ?, 
+       banner_picture = ?, 
+       website = ?, 
+       description = ?
        WHERE id = ?`,
       [
         username || user.username,
@@ -164,14 +171,15 @@ router.put("/profile/edit", async (req, res) => {
         profileUrl,
         bannerUrl,
         website || user.website,
+        description || user.description,
         userId
       ],
       function (err) {
         if (err) return res.status(500).json({ error: err.message });
 
         db.get(
-          `SELECT id, username, email, address, profile_picture, banner_picture, website, created_at
-           FROM users WHERE id = ?`,
+          `SELECT id, username, email, address, profile_picture, banner_picture, website, description, created_at
+       FROM users WHERE id = ?`,
           [userId],
           (err, updatedUser) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -180,6 +188,7 @@ router.put("/profile/edit", async (req, res) => {
         );
       }
     );
+
   });
 });
 
