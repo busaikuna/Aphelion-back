@@ -59,7 +59,7 @@ router.get("/", (req, res) => {
   db.all(
     `SELECT 
         p.post_id, 
-        p.author_id, 
+        u.user_tag, 
         u.username, 
         u.profile_picture,
         p.description, 
