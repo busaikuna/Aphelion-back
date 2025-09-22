@@ -262,6 +262,7 @@ router.get("/anotherProfile/:tag", async (req, res) => {
 
         res.json({
           profile_username: user.username,
+          profile_tag: user.user_tag,
           profile_email: user.email,
           profile_description: user.description,
           profile_address: user.address,

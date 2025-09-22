@@ -78,6 +78,38 @@ router.get("/", (req, res) => {
   );
 });
 
+router.get("/:userTag", (req, res) => {
+    const { userTag } = req.params;
+
+    db.get(`SELECT id FROM users WHERE user_tag = ?`, [userTag], (err, user) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+
+        const userId = user.id;
+
+        db.all(
+            `SELECT 
+                p.post_id, 
+                u.user_tag, 
+                u.username, 
+                u.profile_picture,
+                p.description, 
+                p.content, 
+                p.picture, 
+                p.created_at
+            FROM posts p
+            JOIN users u ON p.author_id = u.id
+            WHERE p.author_id = ?
+            ORDER BY p.created_at DESC;`,
+            [userId],
+            (err, rows) => {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json(rows);
+            }
+        );
+    });
+});
+
 
 router.post("/comments", (req, res) => {
   const { post_id, user_id, comment } = req.body;
